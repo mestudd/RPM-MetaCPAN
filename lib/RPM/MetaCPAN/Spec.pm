@@ -8,19 +8,19 @@ use namespace::clean;
 our $VERSION = '0.01';
 
 has dist_config => (
-	is      => 'ro',
-	lazy    => 1,
-	default => sub { {} },
+	is       => 'ro',
+	required => 1,
+	handles  => [qw(has_release release)],
 );
 
 has perl => (
-	is => 'ro',
+	is      => 'ro',
 	default => '5.22.0',
 );
 
 has spec_dir => (
 	is      => 'ro',
-	default => '.',
+	default => './SPECS',
 );
 
 my %label_for = (
@@ -72,10 +72,11 @@ sub license_for {
 sub name {
 	my ($self, $name) = @_;
 
-	my $rpm_name = 'perl-' . $name;
-	if (exists $self->dist_config->{$name}->{rpm_name}) {
-		$rpm_name = $self->dist_config->{$name}->{rpm_name};
+	my $rpm_name;
+	if ($self->has_release($name)) {
+		$rpm_name = $self->release($name)->rpm_name;
 	}
+	$rpm_name //= 'perl-' . $name;
 
 	return $rpm_name;
 }
@@ -86,22 +87,11 @@ sub spec {
 	return sprintf '%s/%s.spec', $self->spec_dir, $self->name($name);
 }
 
-sub _filter_core {
-	my ($self, $reqs) = @_;
-
-#	unless ($self->core) {
-		foreach my $module ($reqs->required_modules) {
-			if (Module::CoreList::is_core($module, undef, $self->perl)) {
-				$reqs->clear_requirement($module);
-			}
-		}
-#	}
-}
-
 sub generate_spec {
 	my ($self, $release) = @_;
 
-	my $config = $self->dist_config->{$release->name};
+	my $name = $release->name;
+	my $config = $self->release($name);
 
 	# FIXME need to calculate these
 	my $noarch = 1;
@@ -111,48 +101,33 @@ sub generate_spec {
 	my $date = 'Fri Oct 09 2015';
 	my $packager = 'Malcolm Studd <mstudd@recognia.com>';
 
-	my $name = $release->name;
 	my $rpm_name = $self->name($release->name);
 	my $version = $release->version;
 	my $license = $self->license_for($release);
 	my $summary = $release->abstract;
 	my $description = $release->description || $release->abstract;
-	my @patches = @{ $config->{patches} // [] };
+	my @patches = $config->patches;
 	my $patches = join("\n",
 		(map { "Patch$_:         $patches[$_]" } 0..$#patches));
 	my $patches_apply = join("\n", map { "\n%patch$_ -p1" } 0..$#patches );
 	my $perlv = $self->perl;
 
-	# TODO: want to refactor this into shared location
-	my $features = $config->{features} // [];
-	my $prereqs = $release->effective_prereqs($features);
-
-	my @phases = qw(configure build test);
-	my @relationships = qw(requires recommends suggests);
-
-	my $build_reqs = $prereqs->merged_requirements(\@phases, \@relationships);
-	$build_reqs->clear_requirement($_)
-		foreach ('perl', @{ $config->{exclude_build_requires} // [] });
-	$self->_filter_core($build_reqs);
-
-	my $reqs = $prereqs->merged_requirements(['runtime'], \@relationships);
-	$reqs->clear_requirement($_)
-		foreach ('perl', @{ $config->{exclude_requires} // [] });
-	$self->_filter_core($reqs);
+	my $build_reqs = $config->build_requires($release);
+	my $reqs = $config->requires($release);
 
 	my $build_requires = join("\n", map
 		"BuildRequires:  $_", sort $build_reqs->required_modules);
 	my $requires = join("\n", map
 		"Requires:       $_", sort $reqs->required_modules);
 	my $provides = join("\n", map
-		"Provides:       $_", @{ $config->{provides} // [] });
+		"Provides:       $_", $config->provides);
 
 	my $rpm48_filters = join('', map
 		qq{\n%filter_from_requires /^%{?scl_prefix}perl($_)/d},
-		@{ $config->{exclude_requires} // [] });
+		$config->exclude_requires);
 	my $rpm49_filters = join('', map
 		qq{\n%global __requires_exclude %{?__requires_exclude|%__requires_exclude|}^%{?scl_prefix}perl\\\\($_\\\\)},
-		@{ $config->{exclude_requires} // [] });
+		$config->exclude_requires);
 
 	my $autoinstall_nodeps = '';
 	if ($uses_autoinstall) {
@@ -194,7 +169,7 @@ sub generate_spec {
 Name:           %{?scl_prefix}$rpm_name
 Version:        $version
 Release:        1%{dist}
-}. ($config->{epoch} ? "Epoch:          $config->{epoch}" : '') . qq{
+}. ($config->epoch ? "Epoch:          $config->epoch" : '') . qq{
 Summary:        $summary
 License:        $license
 Group:          Development/Libraries

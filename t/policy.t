@@ -4,7 +4,7 @@ use Test::More;
 use CPAN::Meta;
 use MetaCPAN::Walker::Release;
 use Role::Tiny;
-
+use RPM::MetaCPAN::DistConfig;
 
 my %config = (
 	'Release-Name' => {
@@ -12,6 +12,7 @@ my %config = (
 		exclude_build_requires => [ 'test::recommends', 'build::suggests' ],
 	},
 );
+my $dist_config = RPM::MetaCPAN::DistConfig->new(config => \%config);
 
 my %dist = (
 	abstract       => 'abstract',
@@ -83,7 +84,7 @@ my $release2 = MetaCPAN::Walker::Release->new(
 # DistConfig policy
 
 require_ok 'MetaCPAN::Walker::Policy::DistConfig';
-isa_ok my $policy = MetaCPAN::Walker::Policy::DistConfig->new(dist_config => \%config),
+isa_ok my $policy = MetaCPAN::Walker::Policy::DistConfig->new(dist_config => $dist_config),
 	'MetaCPAN::Walker::Policy::DistConfig', 'policy:distconfig is policy:distconfig';
 ok Role::Tiny::does_role($policy, 'MetaCPAN::Walker::Policy'),
 	'policy:distconfig does MetaCPAN::Walker::Policy';
@@ -109,7 +110,7 @@ is_deeply $policy->missing, { 'Missing-Release' => $release2 },
 
 
 # Test core
-my $core = MetaCPAN::Walker::Policy::DistConfig->new(core => 1, dist_config => \%config);
+my $core = MetaCPAN::Walker::Policy::DistConfig->new(core => 1, dist_config => $dist_config);
 $core->process_release([], $release);
 is_deeply [ sort $release->required_modules ],
 	[sort qw(runtime::recommends runtime::requires
@@ -124,7 +125,7 @@ is_deeply [ sort $release->required_modules ],
 my %feature_config = %config;
 $feature_config{'Release-Name'}->{features} = [ 'option' ];
 my $features = MetaCPAN::Walker::Policy::DistConfig->new(
-	dist_config => \%feature_config,
+	dist_config => RPM::MetaCPAN::DistConfig->new(config => \%feature_config),
 );
 $features->process_release([], $release);
 is_deeply [ sort $release->required_modules ],
@@ -136,7 +137,7 @@ is_deeply [ sort $release->required_modules ],
 	'policy:distconfig optional feature processed with config';
 
 
-my $seen = MetaCPAN::Walker::Policy::DistConfig->new(seen => 1, dist_config => \%config);
+my $seen = MetaCPAN::Walker::Policy::DistConfig->new(seen => 1, dist_config => $dist_config);
 $seen->process_release([], $release);
 ok $seen->process_release([], $release),
 	'policy:distconfig repeat release processed with option';

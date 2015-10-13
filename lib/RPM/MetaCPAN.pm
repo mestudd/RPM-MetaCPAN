@@ -1,7 +1,9 @@
 package RPM::MetaCPAN;
 use v5.10.0;
  
+use JSON::XS qw(decode_json);
 use MetaCPAN::Walker;
+use RPM::MetaCPAN::DistConfig;
 
 use Moo;
 use strictures 2;
@@ -12,7 +14,7 @@ use MooX::Options protect_argv => 0;
 
 our $VERSION = '0.01';
 
-option config_file => (
+has config_file => (
 	is      => 'ro',
 	format  => 's',
 	default => './etc/config.json',
@@ -30,6 +32,12 @@ option dist_file => (
 	default => './etc/dists.json',
 );
 
+has dist_config => (
+	is      => 'ro',
+	lazy    => 1,
+	builder => '_build_dist_config',
+);
+
 has dists => (
 	is      => 'ro',
 	lazy    => 1,
@@ -41,14 +49,23 @@ sub _build_configuration {
 	return $self->_read_json_file($self->config_file);
 }
 
+sub _build_dist_config {
+	my $self = shift;
+
+	return RPM::MetaCPAN::DistConfig->new(
+		config => $self->dists,
+	);
+}
+
 sub _build_dists {
 	my $self = shift;
-	return $self->_read_json_file($self->config_file);
+	return $self->_read_json_file($self->dist_file);
 }
 
 sub _read_json_file {
-	my ($self, $file) = shift;
+	my ($self, $file) = @_;
 
+#use Carp; confess '$file undef' if (!defined $file);
 	local $/;
 	open( my $fh, '<', $file );
 	my $json_text = <$fh>;

@@ -4,6 +4,7 @@ use Test::More;
 use CPAN::Meta;
 use MetaCPAN::Walker::Release;
 use Role::Tiny;
+use RPM::MetaCPAN::DistConfig;
 
 
 my %dist = (
@@ -40,9 +41,9 @@ my $release3 = MetaCPAN::Walker::Release->new(
 require_ok 'MetaCPAN::Walker::Local::RPMSpec';
 isa_ok my $local = MetaCPAN::Walker::Local::RPMSpec->new(
 	spec_dir => './t/data',
-	dist_config => {
+	dist_config => RPM::MetaCPAN::DistConfig->new(config => {
 		'Release-B' => { rpm_name => 'b' },
-	},
+	}),
 ), 'MetaCPAN::Walker::Local::RPMSpec', 'local:rpmspec is local:rpmspec';
 ok Role::Tiny::does_role($local, 'MetaCPAN::Walker::Local'),
 	'local:rpmspec does MetaCPAN::Walker::Local';

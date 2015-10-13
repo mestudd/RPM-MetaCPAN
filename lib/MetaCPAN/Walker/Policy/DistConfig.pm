@@ -1,8 +1,6 @@
 package MetaCPAN::Walker::Policy::DistConfig;
 use v5.10.0;
 
-use Module::CoreList;
-
 use Moo;
 use strictures 2;
 use namespace::clean;
@@ -26,6 +24,7 @@ has core  => (
 has dist_config => (
 	is       => 'ro',
 	required => 1,
+	handles  => [qw(has_release release)],
 );
 
 has _in_conflict => (
@@ -84,19 +83,12 @@ sub add_missing {
 sub _filter_core {
 	my ($self, $reqs) = @_;
 
-	unless ($self->core) {
-		foreach my $module ($reqs->required_modules) {
-			if (Module::CoreList::is_core($module, undef, $self->perl)) {
-				$reqs->clear_requirement($module);
-			}
-		}
-	}
 }
 
 sub process_release {
 	my ($self, $path, $release) = @_;
 
-	if (!exists $self->dist_config->{$release->name}) {
+	if (!$self->has_release($release->name)) {
 		$self->add_missing([ @$path ], $release);
 		return 0;
 	}
@@ -105,26 +97,15 @@ sub process_release {
 	$self->_seen->{$release->name} = 1;
 
 	if (!$seen) {
-		# TODO: want to refactor this into shared location
-		my $config = $self->dist_config->{$release->name};
-		my $features = $config->{features} // [];
-		my $prereqs = $release->effective_prereqs($features);
+		my $config = $self->release($release->name);
+		my $reqs = CPAN::Meta::Requirements->new();
 
-		my @phases = qw(configure build test);
-		my @relationships = qw(requires recommends suggests);
-
-		my $build_reqs = $prereqs->merged_requirements(\@phases, \@relationships);
-		$build_reqs->clear_requirement($_)
-			foreach ('perl', @{ $config->{exclude_build_requires} // [] });
-		$self->_filter_core($build_reqs);
-
-		my $reqs = $prereqs->merged_requirements(['runtime'], \@relationships);
-		$reqs->clear_requirement($_)
-			foreach ('perl', @{ $config->{exclude_requires} // [] });
-		$self->_filter_core($reqs);
-
-		$reqs->add_requirements($build_reqs);
-
+		$reqs->add_requirements(
+			$config->build_requires($release, $self->perl, $self->core),
+		);
+		$reqs->add_requirements(
+			$config->requires($release, $self->perl, $self->core),
+		);
 		$release->requirements($reqs);
 	}
 
