@@ -65,7 +65,6 @@ sub _build_dists {
 sub _read_json_file {
 	my ($self, $file) = @_;
 
-#use Carp; confess '$file undef' if (!defined $file);
 	local $/;
 	open( my $fh, '<', $file );
 	my $json_text = <$fh>;

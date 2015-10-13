@@ -107,6 +107,10 @@ sub process_release {
 			$config->requires($release, $self->perl, $self->core),
 		);
 		$release->requirements($reqs);
+
+		if ($config->download_url) {
+			$release->download_url($config->download_url);
+		}
 	}
 
 	return $self->seen || !$seen;

@@ -51,6 +51,10 @@ use Moo;
 use strictures 2;
 use namespace::clean;
 
+has download_url => (
+	is      => 'rw',
+);
+
 has epoch => (
 	is      => 'rw',
 );

@@ -69,6 +69,9 @@ require_ok 'RPM::MetaCPAN::DistConfig';
 isa_ok my $dist_default = RPM::MetaCPAN::DistConfig::Dist->new(),
 	'RPM::MetaCPAN::DistConfig::Dist', 'dist is distconfig:dist';
 
+is $dist_default->download_url, undef, 'dist default download_url undef';
+$dist_default->download_url('https://example.org/download.tgz');
+is $dist_default->download_url, 'https://example.org/download.tgz', 'set download_url';
 is $dist_default->epoch, undef, 'dist default epoch undef';
 $dist_default->epoch(3);
 is $dist_default->epoch, 3, 'set epoch';
@@ -96,6 +99,7 @@ is_deeply $dist_default->_rpm_build_requires, [],
 	'dist default exclude build requires';
 
 my $dist = RPM::MetaCPAN::DistConfig::Dist->new(
+	download_url => 'https://example.org/download.tgz',
 	epoch => 2,
 	rpm_name => 'rpm-name',
 	exclude_build_requires => [ 'build::suggests' ],
@@ -109,6 +113,7 @@ my $dist = RPM::MetaCPAN::DistConfig::Dist->new(
 	rpm_requires => [ 'rpm-package2' ],
 );
 
+is $dist_default->download_url, 'https://example.org/download.tgz', 'dist configured download_url';
 is $dist->epoch, 2, 'dist configured epoch';
 is $dist->rpm_name, 'rpm-name', 'dist configured rpm_name';
 is_deeply $dist->_exclude_build_requires, [ 'build::suggests' ],

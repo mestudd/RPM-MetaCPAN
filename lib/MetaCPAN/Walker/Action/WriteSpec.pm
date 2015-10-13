@@ -35,6 +35,9 @@ sub end_release {
 	push @{ $self->build_order }, $name;
 	$self->_seen->{$name} = 1;
 
+	# download source file
+	$self->download_release($release);
+
 	if ($release->update_available) {
 		warn "$name: Can't update spec files yet";
 		return;
