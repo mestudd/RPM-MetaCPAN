@@ -44,7 +44,12 @@ sub end_release {
 		return;
 	}
 	# Write spec file
-	say sprintf '%s: Write %s file here', $name, $self->spec($name);
+	if (open(my $fh, '>', $self->spec($name))) {
+		print $fh $self->generate_spec($release);
+		say sprintf '%s: Wrote %s', $name, $self->spec($name);
+	} else {
+		die "Could not open spec file for writing: $!\n";
+	}
 }
 
 # Do nothing?

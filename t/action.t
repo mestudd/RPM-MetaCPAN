@@ -6,15 +6,28 @@ use MetaCPAN::Walker::Release;
 use Role::Tiny;
 
 
+my %dist = (
+	abstract       => 'abstract',
+	author         => ['author'],
+	dynamic_config => 0,
+	generated_by   => 'nothing',
+	license        => ['perl_5'],
+	'meta-spec'    => { version => 2 },
+	release_status => 'stable',
+	version        => 'v0.0.1',
+);
+
 my $release1 = MetaCPAN::Walker::Release->new(
-	name      => 'Release-Name',
-	required  => 0,
-	release   => undef,
+	cpan_meta => CPAN::Meta->new({
+		%dist,
+		name      => 'Release-Name',
+	}),
 );
 my $release2 = MetaCPAN::Walker::Release->new(
-	name      => 'Release-Two',
-	required  => 2,
-	release   => undef,
+	cpan_meta => CPAN::Meta->new({
+		%dist,
+		name      => 'Release-Two',
+	}),
 );
 
 # Print build order

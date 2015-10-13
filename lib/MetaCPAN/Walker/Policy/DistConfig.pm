@@ -11,10 +11,12 @@ our $VERSION = '0.01';
 
 with qw(MetaCPAN::Walker::Policy);
 
+=cut
 has conflicts => (
 	is => 'ro',
 	default => sub { {}; },
 );
+=cut
 
 has core  => (
 	is      => 'ro',
@@ -53,6 +55,7 @@ has _seen => (
 	default => sub { {} },
 );
 
+=cut
 
 sub _add_conflict {
 	my ($self, $release, $path) = @_;
@@ -67,6 +70,7 @@ sub _add_conflict {
 	}
 	push @{$self->conflicts->{$name}->{paths}}, $path;
 }
+=cut
 
 # override to get interactive behaviour, etc
 sub add_missing {
@@ -77,53 +81,74 @@ sub add_missing {
 	$self->missing->{$release->name} = $release;
 }
 
-sub process_dependency {
-	my ($self, $path, $release, $dependency) = @_;
+sub _filter_core {
+	my ($self, $reqs) = @_;
 
-	return 0 if ($dependency->{module} eq 'perl');
-
-	# Ignore core & dual-life modules unless so configured
 	unless ($self->core) {
-		return 0 if (Module::CoreList::is_core(
-				$dependency->{module},
-				undef,
-				$self->perl,
-		));
+		foreach my $module ($reqs->required_modules) {
+			if (Module::CoreList::is_core($module, undef, $self->perl)) {
+				$reqs->clear_requirement($module);
+			}
+		}
 	}
-
-	# Don't follow 'develop' requirements TODO: just follow everything?
-	return 0 if ($dependency->{phase} eq 'develop');
-
-	# Keep track of conflicting releases
-	if ($dependency->{relationship} eq 'conflicts') {
-		$self->_in_conflict(1);
-	}
-
-	# Top-level don't have parent release
-	if ($release) {
-		# Skip configured exclusions
-		my $name = $release->name;
-		my $config = $self->dist_config->{$name};
-		return 0 if ($dependency->{phase} eq 'runtime'
-				&& grep(/$name/, @{ $config->{exclude_requires} // [] }));
-		return 0 if ($dependency->{phase} ne 'runtime'
-				&& grep(/$name/, @{ $config->{exclude_build_requires} // [] }));
-	}
-
-	# Generally follow requirements; process_release checks against config
-	return 1;
 }
 
 sub process_release {
 	my ($self, $path, $release) = @_;
 
+	if (!exists $self->dist_config->{$release->name}) {
+		$self->add_missing([ @$path ], $release);
+		return 0;
+	}
+
+	my $seen = $self->_seen->{$release->name};
+	$self->_seen->{$release->name} = 1;
+
+	if (!$seen) {
+		# TODO: want to refactor this into shared location
+		my $config = $self->dist_config->{$release->name};
+		my $features = $config->{features} // [];
+		my $prereqs = $release->effective_prereqs($features);
+
+		my @phases = qw(configure build test);
+		my @relationships = qw(requires recommends suggests);
+
+		my $build_reqs = $prereqs->merged_requirements(\@phases, \@relationships);
+		$build_reqs->clear_requirement($_)
+			foreach ('perl', @{ $config->{exclude_build_requires} // [] });
+		$self->_filter_core($build_reqs);
+
+		my $reqs = $prereqs->merged_requirements(['runtime'], \@relationships);
+		$reqs->clear_requirement($_)
+			foreach ('perl', @{ $config->{exclude_requires} // [] });
+		$self->_filter_core($reqs);
+
+		$reqs->add_requirements($build_reqs);
+
+		$release->requirements($reqs);
+	}
+
+	return $self->seen || !$seen;
+
+
+
+
+
+
+
+
+
+
+
+
+
+=cut
 	# Keep track of conflicting releases
 	if ($self->_in_conflict) {
 		$self->_add_conflict($release, [ @$path ]);
 		$self->_in_conflict(0);
 		return 0;
 	}
-
 
 	if (!exists $self->dist_config->{$release->name}) {
 		$self->add_missing([ @$path ], $release);
@@ -134,6 +159,7 @@ sub process_release {
 	$self->_seen->{$release->name} = 1;
 
 	return $self->seen || !$seen;
+=cut
 }
 
 1;

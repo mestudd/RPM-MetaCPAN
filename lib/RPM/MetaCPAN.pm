@@ -1,8 +1,60 @@
 package RPM::MetaCPAN;
+use v5.10.0;
+ 
+use MetaCPAN::Walker;
 
-use strict;
-use 5.008_005;
+use Moo;
+use strictures 2;
+use namespace::clean;
+
+# Keep these in namespace
+use MooX::Options protect_argv => 0;
+
 our $VERSION = '0.01';
+
+option config_file => (
+	is      => 'ro',
+	format  => 's',
+	default => './etc/config.json',
+);
+
+has configuration => (
+	is      => 'ro',
+	lazy    => 1,
+	builder => '_build_configuration',
+);
+
+option dist_file => (
+	is      => 'ro',
+	format  => 's',
+	default => './etc/dists.json',
+);
+
+has dists => (
+	is      => 'ro',
+	lazy    => 1,
+	builder => '_build_dists',
+);
+
+sub _build_configuration {
+	my $self = shift;
+	return $self->_read_json_file($self->config_file);
+}
+
+sub _build_dists {
+	my $self = shift;
+	return $self->_read_json_file($self->config_file);
+}
+
+sub _read_json_file {
+	my ($self, $file) = shift;
+
+	local $/;
+	open( my $fh, '<', $file );
+	my $json_text = <$fh>;
+	close ($fh);
+	return decode_json($json_text);
+}
 
 1;
 __END__

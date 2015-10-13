@@ -14,23 +14,26 @@ my %dist = (
 	license        => ['perl_5'],
 	'meta-spec'    => { version => 2 },
 	release_status => 'stable',
-	version        => '0.0.1',
+	version        => 'v0.0.1',
 );
 
 my $release1 = MetaCPAN::Walker::Release->new(
-	name      => 'Release-A',
-	required  => 0,
-	release   => undef,
+	cpan_meta => CPAN::Meta->new({
+		%dist,
+		name      => 'Release-A',
+	}),
 );
 my $release2 = MetaCPAN::Walker::Release->new(
-	name      => 'Release-B',
-	required  => 2,
-	release   => undef,
+	cpan_meta => CPAN::Meta->new({
+		%dist,
+		name      => 'Release-B',
+	}),
 );
 my $release3 = MetaCPAN::Walker::Release->new(
-	name      => 'Release-C',
-	required  => 2,
-	release   => undef,
+	cpan_meta => CPAN::Meta->new({
+		%dist,
+		name      => 'Release-C',
+	}),
 );
 
 # use "require $module" as heuristic
