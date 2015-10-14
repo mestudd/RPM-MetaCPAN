@@ -157,6 +157,7 @@ sub generate_spec {
 	chomp $packager;
 
 	my $rpm_name = $self->name($release->name);
+	my $epoch = $config->epoch;
 	my $version = $release->version;
 	$version =~ s/^v//; # RPM version must not have the v.
 	my $license = $self->license_for($release);
@@ -228,7 +229,7 @@ sub generate_spec {
 Name:           %{?scl_prefix}$rpm_name
 Version:        $version
 Release:        1%{dist}
-}. ($config->epoch ? "Epoch:          $config->epoch" : '') . qq{
+}. ($epoch ? "Epoch:          $epoch" : '') . qq{
 Summary:        $summary
 License:        $license
 Group:          Development/Libraries
