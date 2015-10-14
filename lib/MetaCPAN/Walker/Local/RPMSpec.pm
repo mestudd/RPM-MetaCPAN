@@ -18,12 +18,13 @@ has versions => (
 sub local_version {
 	my ($self, $release) = @_;
 
-	my $name = $release->name;
+	my $name = $release->distribution;
 	if (!exists $self->versions->{$name}) {
 		if (open(my $fh, '<', $self->spec($name))) {
+			my $prefix = $release->version =~ /^v/ ? 'v' : '';
 			while (<$fh>) {
 				if (/^version:\W*(\S+)/i) {
-					$self->versions->{$name} = 'v'.$1;
+					$self->versions->{$name} = $prefix.$1;
 					last;
 				}
 			}

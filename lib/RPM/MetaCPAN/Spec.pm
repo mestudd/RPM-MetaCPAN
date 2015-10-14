@@ -158,6 +158,7 @@ sub generate_spec {
 
 	my $rpm_name = $self->name($release->name);
 	my $version = $release->version;
+	$version =~ s/^v//; # RPM version must not have the v.
 	my $license = $self->license_for($release);
 	my $summary = $release->abstract;
 	my $description = $release->description || $release->abstract;
