@@ -78,6 +78,8 @@ sub add_missing {
 	warn "Missing release: ".$release->name
 		if (!exists $self->missing->{$release->name});
 	$self->missing->{$release->name} = $release;
+
+	return 0;
 }
 
 sub _filter_core {
@@ -89,8 +91,8 @@ sub process_release {
 	my ($self, $path, $release) = @_;
 
 	if (!$self->has_release($release->name)) {
-		$self->add_missing([ @$path ], $release);
-		return 0;
+		my $add = $self->add_missing([ @$path ], $release);
+		return 0 unless ($add);
 	}
 
 	my $seen = $self->_seen->{$release->name};

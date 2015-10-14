@@ -1,0 +1,28 @@
+#!/usr/bin/perl 
+use strict;
+use warnings;
+use v5.10.0;
+
+use MetaCPAN::Walker;
+use MetaCPAN::Walker::Action::WriteSpec;
+use MetaCPAN::Walker::Local::RPMSpec;
+use MetaCPAN::Walker::Policy::InteractiveDistConfig;
+use RPM::MetaCPAN;
+
+my $rpm = RPM::MetaCPAN->new_with_options;
+
+my %params = (
+	%{ $rpm->configuration },
+	dist_config => $rpm->dist_config,
+);
+
+my $walker = MetaCPAN::Walker->new(
+	action => MetaCPAN::Walker::Action::WriteSpec->new(%params),
+	local  => MetaCPAN::Walker::Local::RPMSpec->new(%params),
+	policy => MetaCPAN::Walker::Policy::InteractiveDistConfig->new(%params),
+);
+
+$walker->walk_from_modules(@ARGV);
+
+$, = ', ';
+say sort keys %{ $rpm->dist_config->_releases };

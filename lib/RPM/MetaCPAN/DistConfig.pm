@@ -2,6 +2,7 @@ package RPM::MetaCPAN::DistConfig;
 use v5.10.0;
 
 use Module::CoreList;
+use Scalar::Util qw(blessed);
 
 use Moo;#XXX? ::Role;
 use strictures 2;
@@ -41,8 +42,11 @@ sub has_release {
 }
 
 sub release {
-	my ($self, $name) = @_;
+	my ($self, $name, $new) = @_;
 
+	if (blessed $new && $new->isa('RPM::MetaCPAN::DistConfig::Dist')) {
+		$self->_releases->{$name} = $new;
+	}
 	return $self->_releases->{$name};
 }
 
