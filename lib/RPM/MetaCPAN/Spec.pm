@@ -31,12 +31,20 @@ has perl => (
 
 has source_dir => (
 	is      => 'ro',
-	default => './SOURCES',
+	lazy    => 1,
+	builder => '_build_source_dir',
 );
 
 has spec_dir => (
 	is      => 'ro',
-	default => './SPECS',
+	lazy    => 1,
+	builder => '_build_spec_dir',
+);
+
+has _topdir => (
+	is      => 'rw',
+	lazy    => 1,
+	builder => '_build_topdir',
 );
 
 my %label_for = (
@@ -107,11 +115,26 @@ sub _build_http {
 	HTTP::Tiny->new(agent => "RPM::MetaCPAN/$VERSION");
 }
 
+sub _build_source_dir {
+	return shift->_topdir . '/SOURCES';
+}
+
+sub _build_spec_dir {
+	return shift->_topdir . '/SPECS';
+}
+
+sub _build_topdir {
+	my $topdir = `/usr/bin/rpm --eval '%_topdir'`;
+	chomp $topdir;
+
+	return $topdir || './';
+}
+
 sub download_release {
 	my ($self, $release) = @_;
 
 	my $url = $release->download_url;
-	my $local = $self->release_source($release);
+	my $local = $self->source($release);
 	my $response = $self->_http->mirror($url, $local);
 	die "Could not download $url: $response->{status} $response->{reason}\n"
 		if (!$response->{success});
@@ -122,7 +145,6 @@ sub generate_spec {
 
 	my $name = $release->name;
 	my $config = $self->release($name);
-	#my $info = $self->inspect($self->release_source($release));
 	my @files = $self->read_source($release);
 
 	# FIXME need to calculate these
@@ -271,7 +293,7 @@ sub read_source {
 	my $version = $release->version;
 	my @files;
 	my $bogus = 0;
-	for my $file (Archive::Tar->list_archive($self->release_source($release))) {
+	for my $file (Archive::Tar->list_archive($self->source($release))) {
 		if ($file !~ /^(?:.\/)?($name-(?:v\.?)?$version)(?:\/|$)/) {
 			warn "BOGUS PATH DETECTED: $file\n";
 			$bogus++;
@@ -290,7 +312,7 @@ sub read_source {
 	return @files;
 }
 
-sub release_source {
+sub source {
 	my ($self, $release) = @_;
 
 	return $self->source_dir .'/'. basename($release->download_url);
