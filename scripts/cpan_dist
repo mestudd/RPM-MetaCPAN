@@ -25,7 +25,13 @@ my $walker = MetaCPAN::Walker->new(
 
 $walker->walk_from_modules(@ARGV);
 
-my $config = $rpm->dist_config->config;
-my $json = JSON->new->utf8->pretty->canonical;
-open (my $fh, '>', 'dists.new.json') or die "Could not open output: $!";
-say $fh $json->encode($config);
+{
+	my $config = $rpm->dist_config->config;
+	my $json = JSON->new->utf8->pretty->canonical;
+	open (my $fh, '>', 'dists.new.json') or die "Could not open dists.new.json $!";
+	print $fh $json->encode($config);
+}
+{
+	open (my $fh, '>', 'dists.order') or die "Could not open dists.order $!";
+	say $fh $_ foreach (@{ $walker->action->build_order });
+}

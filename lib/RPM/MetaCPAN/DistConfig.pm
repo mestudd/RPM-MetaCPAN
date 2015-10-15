@@ -202,14 +202,15 @@ sub _requires {
 }
 
 sub requires {
-	my ($self, $release, $perl, $core) = @_;
+	my ($self, $release, $perl, $core, $rel) = @_;
 
+	$rel = [qw(requires recommends suggests)] if (!$rel);
 	return $self->_requires(
 		$release,
 		$perl,
 		$core,
 		[qw(runtime)],
-		[qw(requires recommends suggests)],
+		$rel,
 		$self->_exclude_requires,
 		$self->_extra_requires,
 	);

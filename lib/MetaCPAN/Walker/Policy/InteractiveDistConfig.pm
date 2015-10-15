@@ -30,13 +30,18 @@ sub add_missing {
 	my $add = 0;
 	say "At ", join(' -> ', @$path);
 	say "  Release $name is missing.";
+	my $dist = $self->_new_dist();
+	say '    Runtime dependencies';
+	$self->_print_requires($dist, 'requires', $release);
+	say '    Build dependencies';
+	$self->_print_requires($dist, 'requires', $release);
 	if (my @features = $release->features) {
-		say "   It has optional features: ",
+		say '    Plus optional features: ',
 			join(', ', map $_->identifier, @features);
 	}
 	my $key = $self->_read_char(
-		"  Action: i)nfo s)kip; a)dd; c)ustomise? ",
-		'isac',
+		'  Action: -)nfo s)kip; a)dd; c)ustomise? ',
+		'sac',
 	);
 	while ($key) {
 		if ('s' eq $key) {
@@ -44,13 +49,20 @@ sub add_missing {
 			$add = 0;
 			last;
 
+=cut
 		} elsif ('i' eq $key) {
-			say "print more info";
+			# FIXME: add other info if possible?
+			my $dist = $self->_new_dist();
+			say 'Runtime dependencies';
+			$self->_print_requires($dist, 'requires', $release);
+			say 'Build dependencies';
+			$self->_print_requires($dist, 'requires', $release);
 			$key = $self->_read_char(
 				"  Action: s)kip; a)dd; c)ustomise? ",
 				'sac',
 			);
 			next;
+=cut
 
 		} elsif ('a' eq $key) {
 			say "Adding $name with no customisation";
@@ -101,14 +113,14 @@ sub _customise_dist {
 
 		say 'Build requirements are:';
 		my ($exclude, $extra) = $self->_read_requires(
-			$dist->build_requires($release, $self->perl),
+			$dist, 'build_requires', $release,
 		);
 		$config{exclude_build_requires} = $exclude if ($exclude);
 		$config{extra_build_requires} = $extra if ($extra);
 
 		say 'Runtime requirements are:';
 		($exclude, $extra) = $self->_read_requires(
-			$dist->requires($release, $self->perl),
+			$dist, 'requires', $release,
 		);
 		$config{exclude_requires} = $exclude if ($exclude);
 		$config{extra_requires} = $extra if ($extra);
@@ -129,6 +141,22 @@ sub _customise_dist {
 	$self->release($release->name, $self->_new_dist(%config));
 
 	return 1;
+}
+
+sub _print_requires {
+	my ($self, $dist, $type, $release) = @_;
+
+	my $has = 0;
+	foreach my $rel (qw(requires recommends suggests)) {
+		my $reqs = $dist->$type($release, $self->perl, 0, [$rel]);
+		if ($reqs->required_modules) {
+			say '      ', $rel;
+			say '        ', join(',  ', $reqs->required_modules);
+			$has = 1;
+		}
+	}
+
+	return $has;
 }
 
 sub _new_dist {
@@ -187,14 +215,12 @@ sub _read_features {
 }
 
 sub _read_requires {
-	my ($self, $reqs) = @_;
+	my ($self, $dist, $type, $release) = @_;
 
 	my ($exclude, $extra);
 
-	if ($reqs->required_modules) {
-		foreach my $module ($reqs->required_modules) {
-			say $module;
-		}
+	my $has = $self->_print_requires($dist, 'build_requires', $release);
+	if ($has) {
 		my $answer = $self->_read_string(
 			'Enter modules to exclude (space separated) []: ',
 		);
