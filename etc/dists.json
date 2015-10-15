@@ -1,0 +1,22 @@
+{
+   "B-C" : {},
+   "B-Flags" : {},
+   "B-Hooks-EndOfScope" : {},
+   "Capture-Tiny" : {},
+   "Devel-CheckBin" : {},
+   "Dist-CheckConflicts" : {},
+   "IO-Tty" : {},
+   "IPC-Run" : {},
+   "Module-Build" : {},
+   "Module-Implementation" : {},
+   "Module-Runtime" : {},
+   "Opcodes" : {},
+   "Package-Stash" : {},
+   "Package-Stash-XS" : {},
+   "Sub-Exporter-Progressive" : {},
+   "Sub-Name" : {},
+   "Test-Fatal" : {},
+   "Test-Requires" : {},
+   "Try-Tiny" : {},
+   "namespace-clean" : {}
+}

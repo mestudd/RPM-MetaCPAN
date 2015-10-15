@@ -1,0 +1,6 @@
+{
+	"spec_dir": "./SPECS",
+	"source_dir": "./SOURCES",
+	"perl": "5.22.0",
+	"core": 0
+}
