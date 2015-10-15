@@ -11,28 +11,33 @@ use namespace::clean;
 our $VERSION = '0.01';
 
 
-has config => (
-	is       => 'ro',
-	required => 1,
-);
-
 has _releases => (
-	is      => 'ro',
-	lazy    => 1,
-	builder => '_build_releases',
+	is       => 'ro',
+	lazy     => 1,
+	init_arg => 'config',
+	coerce   => sub { _coerce_releases(@_) },
+	default  => sub { {} },
 );
 
-sub _build_releases {
-	my $self = shift;
+sub _coerce_releases {
+	my $source = shift;
 
-	my %releases;
-	foreach my $release (sort keys %{ $self->config }) {
-		$releases{$release} = RPM::MetaCPAN::DistConfig::Dist->new(
-			%{ $self->config->{$release} },
-		);
+	if (ref $source eq 'HASH') {
+		my %releases;
+		foreach my $release (keys %$source) {
+			if (ref $source->{$release} eq 'HASH') {
+				$releases{$release} = RPM::MetaCPAN::DistConfig::Dist->new(
+					%{ $source->{$release} },
+				);
+			} else {
+				$releases{$release} = $source->{$release};
+			}
+		}
+
+		return \%releases;
 	}
 
-	return \%releases;
+	return $source;
 }
 
 sub has_release {
