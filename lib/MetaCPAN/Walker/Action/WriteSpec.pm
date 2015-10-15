@@ -21,6 +21,11 @@ has _seen => (
 	default => sub { {} },
 );
 
+has wait_spec => (
+	is      => 'ro',
+	default => 0,
+);
+
 
 # Nothing to do at begin
 sub begin_release {}
@@ -40,18 +45,22 @@ sub end_release {
 
 	if ($release->update_available) {
 		warn "$name: Can't update spec files yet";
-		return;
-	}
-	if ($release->version_local) {
+
+	} elsif ($release->version_local) {
 		say "$name: At latest version";
-		return;
-	}
-	# Write spec file
-	if (open(my $fh, '>', $self->spec($name))) {
+
+	} elsif (open(my $fh, '>', $self->spec($name))) {
+		# Write spec file
 		print $fh $self->generate_spec($release);
 		say sprintf '%s: Wrote %s', $name, $self->spec($name);
+
 	} else {
 		die "Could not open spec file for writing: $!\n";
+	}
+
+	if ($self->wait_spec) {
+		print "Waiting to continue ";
+		my $enter = <STDIN>;
 	}
 }
 
