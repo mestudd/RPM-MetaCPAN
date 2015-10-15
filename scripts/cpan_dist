@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use v5.10.0;
 
+use JSON;
 use MetaCPAN::Walker;
 use MetaCPAN::Walker::Action::WriteSpec;
 use MetaCPAN::Walker::Local::RPMSpec;
@@ -24,5 +25,7 @@ my $walker = MetaCPAN::Walker->new(
 
 $walker->walk_from_modules(@ARGV);
 
-$, = ', ';
-say sort keys %{ $rpm->dist_config->_releases };
+my $config = $rpm->dist_config->config;
+my $json = JSON->new->utf8->pretty->canonical;
+open (my $fh, '>', 'dists.new.json') or die "Could not open output: $!";
+say $fh $json->encode($config);

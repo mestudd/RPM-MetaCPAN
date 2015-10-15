@@ -40,6 +40,22 @@ sub _coerce_releases {
 	return $source;
 }
 
+sub config {
+	my $self = shift;
+
+	my %config;
+	while (my ($name, $release) = (each %{ $self->_releases })) {
+		my %dist;
+		while (my ($key, $value) = (each %$release)) {
+			$key =~ s/^_*//;
+			$dist{$key} = $value;
+		}
+		$config{$name} = \%dist;
+	}
+
+	return \%config;
+}
+
 sub has_release {
 	my ($self, $name) = @_;
 
@@ -71,49 +87,41 @@ has epoch => (
 has _exclude_build_requires => (
 	is      => 'ro',
 	init_arg => 'exclude_build_requires',
-	default => sub { []; },
 );
 
 has _exclude_requires => (
 	is      => 'ro',
 	init_arg => 'exclude_requires',
-	default => sub { []; },
 );
 
 has _extra_build_requires => (
 	is      => 'ro',
 	init_arg => 'extra_build_requires',
-	default => sub { {}; },
 );
 
 has _extra_requires => (
 	is      => 'ro',
 	init_arg => 'extra_requires',
-	default => sub { {}; },
 );
 
 has _features => (
 	is      => 'ro',
 	init_arg => 'features',
-	default => sub { []; },
 );
 
 has _patches => (
 	is      => 'ro',
 	init_arg => 'patches',
-	default => sub { []; },
 );
 
 has _provides => (
 	is      => 'ro',
 	init_arg => 'provides',
-	default => sub { []; },
 );
 
 has _rpm_build_requires => (
 	is      => 'ro',
 	init_arg => 'rpm_build_requires',
-	default => sub { []; },
 );
 
 has rpm_name => (
@@ -123,7 +131,6 @@ has rpm_name => (
 has _rpm_requires => (
 	is      => 'ro',
 	init_arg => 'rpm_requires',
-	default => sub { []; },
 );
 
 sub build_requires {
@@ -143,31 +150,31 @@ sub build_requires {
 sub exclude_build_requires {
 	my $self = shift;
 
-	return @{ $self->_exclude_build_requires };
+	return @{ $self->_exclude_build_requires // [] };
 }
 
 sub exclude_requires {
 	my $self = shift;
 
-	return @{ $self->_exclude_requires };
+	return @{ $self->_exclude_requires // [] };
 }
 
 sub features {
 	my $self = shift;
 
-	return @{ $self->_features };
+	return @{ $self->_features // [] };
 }
 
 sub patches {
 	my $self = shift;
 
-	return @{ $self->_patches };
+	return @{ $self->_patches // [] };
 }
 
 sub provides {
 	my $self = shift;
 
-	return @{ $self->_provides };
+	return @{ $self->_provides // [] };
 }
 
 sub _requires {

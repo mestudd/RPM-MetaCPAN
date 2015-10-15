@@ -79,23 +79,23 @@ is $dist_default->rpm_name, undef, 'dist default rpm_name undef';
 $dist_default->rpm_name('rpm-name');
 is $dist_default->rpm_name, 'rpm-name', 'set rpm name';
 
-is_deeply $dist_default->_exclude_build_requires, [],
+is $dist_default->_exclude_build_requires, undef,
 	'dist default exclude build requires';
-is_deeply $dist_default->_exclude_requires, [],
+is $dist_default->_exclude_requires, undef,
 	'dist default exclude requires';
-is_deeply $dist_default->_extra_build_requires, {},
+is $dist_default->_extra_build_requires, undef,
 	'dist default extra build requires';
-is_deeply $dist_default->_extra_requires, {},
+is $dist_default->_extra_requires, undef,
 	'dist default extra requires';
-is_deeply $dist_default->_features, [], # FIXME: need to distinguish between configured none and not configured?
+is $dist_default->_features, undef, # FIXME: need to distinguish between configured none and not configured?
 	'dist default features';
-is_deeply $dist_default->_patches, [],
+is $dist_default->_patches, undef,
 	'dist default patches';
-is_deeply $dist_default->_provides, [],
+is $dist_default->_provides, undef,
 	'dist default provides';
-is_deeply $dist_default->_rpm_build_requires, [],
+is $dist_default->_rpm_build_requires, undef,
 	'dist default exclude build requires';
-is_deeply $dist_default->_rpm_build_requires, [],
+is $dist_default->_rpm_build_requires, undef,
 	'dist default exclude build requires';
 
 my $dist = RPM::MetaCPAN::DistConfig::Dist->new(
