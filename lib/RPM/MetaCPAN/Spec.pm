@@ -291,24 +291,26 @@ $files%{_mandir}/man/3/*
 sub read_source {
 	my ($self, $release) = @_;
 
-	my $name = $release->name;
+	my $dir = basename($release->download_url);
+	$dir =~ s/\.(?:tgz|tbz|tar\.gz|tar\.bz2)$//;
 	my $version = $release->version;
 	my @files;
 	my $bogus = 0;
 	for my $file (Archive::Tar->list_archive($self->source($release))) {
-		if ($file !~ /^(?:.\/)?($name-(?:v\.?)?$version)(?:\/|$)/) {
+		if ($file !~ /^(?:.\/)?$dir(?:\/|$)/) {
 			warn "BOGUS PATH DETECTED: $file\n";
 			$bogus++;
 			next;
 		}
 
-		$file =~ s|^(?:.\/)?$name-(?:v\.?)?$version/||;
+		$file =~ s|^(?:.\/)?$dir/?||;
 		next if (!$file);
 
 		push @files, $file;
 	}
 	if ($bogus) {
-		die "$name has $bogus bogus path elements\n";
+		warn "Expecting $dir";
+#		die "$name has $bogus bogus path elements\n";
 	}
 
 	return @files;
