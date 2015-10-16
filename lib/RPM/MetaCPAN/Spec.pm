@@ -261,6 +261,7 @@ Group:          Development/Libraries
 URL:            https://metacpan.org/release/$name
 Source0:        $name-%{version}.tar.gz
 $patches
+}. ($noarch ? "BuildArch:      noarch" : '') . qq{
 BuildRoot:      %{_tmppath}/%{pkg_name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  %{?scl_prefix}perl >= $perlv
