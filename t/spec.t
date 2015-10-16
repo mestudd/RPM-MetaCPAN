@@ -51,11 +51,11 @@ ok Role::Tiny::does_role($spec, 'RPM::MetaCPAN::Spec'),
 	'spec does RPM::MetaCPAN::Spec';
 
 SKIP: {
-	skip 'No /usr/bin/rpm', 1 unless -x '/usr/bin/rpm';
+	skip 'No rpm in /bin:/usr/bin', 1 unless -x '/bin/rpm' || -x '/usr/bin/rpm';
 
 	# Fake $HOME to pick up test .rpmmacros file
 	local $ENV{HOME} = './t/data';
-	local $ENV{PATH} = '';
+	local $ENV{PATH} = '/bin:/usr/bin';
 
 	is $spec->_topdir, './t/data', 'spec _topdir evaluated from rpm';
 }
