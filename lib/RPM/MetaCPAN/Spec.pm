@@ -148,7 +148,7 @@ sub generate_spec {
 	my @files = $self->read_source($release);
 
 	# FIXME need to calculate these
-	my $noarch = grep /[.](?:[ch]|xs|inl)$/i, @files; # grep source tarball for .c, .h, .xs, .inl files
+	my $noarch = !grep /[.](?:[ch]|xs|inl)$/i, @files; # grep source tarball for .c, .h, .xs, .inl files
 	my $scripts = grep /^script/, @files; # meta->  script_files or scripts
 	my $uses_autoinstall = 0; # not in either cpanspec 1.78 nor rpmcpan
 	my $uses_buildpl = grep /^Build\.PL$/, @files; # grep source tarball for Build.PL (near top of hierarchy)
@@ -213,6 +213,30 @@ sub generate_spec {
 		$remove .= "\nfind %{buildroot} -type f -name '*.bs' -exec rm -f {} \\;";
 	}
 
+	# from cpanspec
+	my @doc = sort { $a cmp $b } grep {
+		!/\//
+		and !/\.(pl|xs|h|c|pm|ini?|pod|cfg|inl)$/i
+		and !/^\./
+		and $_ ne "MANIFEST"
+		and $_ ne "MANIFEST.SKIP"
+		and $_ ne "INSTALL"
+		and $_ ne "SIGNATURE"
+		and !/^META\..+$/i
+		and $_ ne "NINJA"
+		and $_ ne "configure"
+		and $_ ne "config.guess"
+		and $_ ne "config.sub"
+		and $_ ne "typemap"
+		and $_ ne "bin"
+		and $_ ne "lib"
+		and $_ ne "t"
+		and $_ ne "inc"
+		and $_ ne "autobuild.sh"
+		and $_ ne "pm_to_blib"
+		and $_ ne "install.sh"
+		} @files;
+
 	my $files = '';
 	if ($scripts) {
 		$files .= "\%{_bindir}/*\n\%{_mandir}/man1/*\n";
@@ -221,6 +245,7 @@ sub generate_spec {
 	unless ($noarch) {
 		$files .= "%{perl_vendorarch}/*\n";
 	}
+	chomp $files;
 
 
 	my $spec = qq{%{?scl:%scl_package $rpm_name}
@@ -258,7 +283,7 @@ $provides
 $description
 
 %prep
-%setup -q -n $name->%{version}
+%setup -q -n $name-%{version}
 $patches_apply
 
 %build
@@ -278,8 +303,9 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc \@doc FIXME
-$files%{_mandir}/man/3/*
+%doc @doc
+$files
+%{_mandir}/man3/*
 
 %changelog
 * $date $packager $version-1
