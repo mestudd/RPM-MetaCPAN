@@ -10,7 +10,7 @@ use Moo::Role;
 use strictures 2;
 use namespace::clean;
 
-our $VERSION = '0.01';
+our $VERSION = 'v0.1.0';
 
 has dist_config => (
 	is       => 'ro',
