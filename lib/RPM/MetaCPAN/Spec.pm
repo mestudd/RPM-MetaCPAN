@@ -193,18 +193,19 @@ sub generate_spec {
 	if ($uses_autoinstall) {
 		$autoinstall_nodeps = qq{export PERL_AUTOINSTALL="--skipdeps"\n};
 	}
-	my $configure = '';
+	my $build = '';
 	my $install = '';
 	my $remove = '';
 	my $check = '';
 	if ($uses_buildpl) {
-		$configure = 'perl Build.PL --installdirs=vendor';
-		$configure .= ' --optimize="%{optflags}"' unless ($noarch);
+		$build = 'perl Build.PL --installdirs=vendor';
+		$build .= ' --optimize="%{optflags}"' unless ($noarch);
 		$install = './Build install --destdir=%{buildroot} --create_packlist=0';
 		$check = './Build test';
 	} else {
-		$configure = 'perl Makefile.PL INSTALLDIRS=vendor';
-		$configure .= ' OPTIMIZE="%{optflags}"' unless ($noarch);
+		$build = 'perl Makefile.PL INSTALLDIRS=vendor';
+		$build .= ' OPTIMIZE="%{optflags}"' unless ($noarch);
+		$build .= ' && make %{?_smp_mflags}';
 		$install = 'make pure_install DESTDIR=%{buildroot}';
 		$remove .= "\nfind %{buildroot} -type f -name .packlist -exec rm -f {} \\;";
 		$check = 'make test';
@@ -289,7 +290,7 @@ $description
 $patches_apply
 
 %build
-%{?scl:scl enable %{scl} '}$configure && make %{?_smp_mflags}%{?scl:'}
+%{?scl:scl enable %{scl} '}$build%{?scl:'}
 
 %install
 %{?scl:scl enable %{scl} '}$install%{?scl:'}
