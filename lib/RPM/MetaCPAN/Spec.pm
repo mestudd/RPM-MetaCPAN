@@ -241,8 +241,9 @@ sub generate_spec {
 	if ($scripts) {
 		$files .= "\%{_bindir}/*\n\%{_mandir}/man1/*\n";
 	}
-	$files .= "%{perl_vendorlib}/*\n";
-	unless ($noarch) {
+	if ($noarch) {
+		$files .= "%{perl_vendorlib}/*\n";
+	} else {
 		$files .= "%{perl_vendorarch}/*\n";
 	}
 	chomp $files;
