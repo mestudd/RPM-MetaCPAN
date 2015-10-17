@@ -134,14 +134,15 @@ has _rpm_requires => (
 );
 
 sub build_requires {
-	my ($self, $release, $perl, $core) = @_;
+	my ($self, $release, $perl, $core, $rel) = @_;
 
+	$rel = [qw(requires recommends suggests)] if (!$rel);
 	return $self->_requires(
 		$release,
 		$perl,
 		$core,
 		[qw(configure build test)],
-		[qw(requires recommends suggests)],
+		$rel,
 		$self->_exclude_build_requires,
 		$self->_extra_build_requires,
 	);
