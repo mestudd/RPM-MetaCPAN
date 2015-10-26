@@ -225,16 +225,14 @@ sub _read_requires {
 
 	my ($exclude, $extra);
 
-	my $has = $self->_print_requires($dist, 'build_requires', $release);
-	if ($has) {
-		my $answer = $self->_read_string(
-			'Enter modules to exclude (space separated) []: ',
-		);
-		if ($answer) {
-			$exclude = [ split /\s+/, $answer ];
-		}
-	}
+	$self->_print_requires($dist, 'build_requires', $release);
 	my $answer = $self->_read_string(
+		'Enter modules to exclude (space separated) []: ',
+	);
+	if ($answer) {
+		$exclude = [ split /\s+/, $answer ];
+	}
+	$answer = $self->_read_string(
 		'Enter extra modules to include (space separated) []: ',
 	);
 	if ($answer) {
