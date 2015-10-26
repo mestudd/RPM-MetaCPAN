@@ -1,6 +1,7 @@
 package MetaCPAN::Walker::Policy::InteractiveDistConfig;
 use v5.10.0;
 
+use JSON;
 use MetaCPAN::Walker::Release;
 use Term::ReadKey;
 
@@ -9,6 +10,7 @@ use strictures 2;
 use namespace::clean;
 
 our $VERSION = '0.01';
+my $JSON = JSON->new->utf8->pretty->canonical;
 
 extends 'MetaCPAN::Walker::Policy::DistConfig';
 
@@ -34,7 +36,7 @@ sub add_missing {
 	say '    Runtime dependencies';
 	$self->_print_requires($dist, 'requires', $release);
 	say '    Build dependencies';
-	$self->_print_requires($dist, 'requires', $release);
+	$self->_print_requires($dist, 'build_requires', $release);
 	if (my @features = $release->features) {
 		say '    Plus optional features: ',
 			join(', ', map $_->identifier, @features);
@@ -74,6 +76,10 @@ sub add_missing {
 			$add = $self->_customise_dist($release);
 			last;
 		}
+	}
+
+	if (open(my $fh, '>', 'dists.incr.json')) {
+		print $fh $JSON->encode($self->dist_config->config);
 	}
 
 	return $add;
