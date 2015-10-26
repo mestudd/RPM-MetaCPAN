@@ -136,7 +136,7 @@ sub download_release {
 	my $url = $release->download_url;
 	my $local = $self->source($release);
 	my $response = $self->_http->mirror($url, $local);
-	die "Could not download $url: $response->{status} $response->{reason}\n"
+	die "Could not download $url: $response->{status} $response->{reason}\n$response->{content}"
 		if (!$response->{success});
 }
 
@@ -149,7 +149,7 @@ sub generate_spec {
 
 	# FIXME need to calculate these
 	my $noarch = !grep /[.](?:[ch]|xs|inl)$/i, @files; # grep source tarball for .c, .h, .xs, .inl files
-	my $scripts = grep /^script/, @files; # meta->  script_files or scripts
+	my $scripts = grep /^(?:script|bin)\//, @files; # meta->  script_files or scripts
 	my $uses_autoinstall = 0; # not in either cpanspec 1.78 nor rpmcpan
 	my $uses_buildpl = grep /^Build\.PL$/, @files; # grep source tarball for Build.PL (near top of hierarchy)
 	my $date = strftime("%a %b %d %Y", localtime);
