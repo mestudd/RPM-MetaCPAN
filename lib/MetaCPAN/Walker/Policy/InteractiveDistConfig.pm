@@ -225,7 +225,7 @@ sub _read_requires {
 
 	my ($exclude, $extra);
 
-	$self->_print_requires($dist, 'build_requires', $release);
+	$self->_print_requires($dist, $type, $release);
 	my $answer = $self->_read_string(
 		'Enter modules to exclude (space separated) []: ',
 	);
