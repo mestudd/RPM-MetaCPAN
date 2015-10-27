@@ -89,42 +89,42 @@ has epoch => (
 );
 
 has _exclude_build_requires => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'exclude_build_requires',
 );
 
 has _exclude_requires => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'exclude_requires',
 );
 
 has _extra_build_requires => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'extra_build_requires',
 );
 
 has _extra_requires => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'extra_requires',
 );
 
 has _features => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'features',
 );
 
 has _patches => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'patches',
 );
 
 has _provides => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'provides',
 );
 
 has _rpm_build_requires => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'rpm_build_requires',
 );
 
@@ -133,8 +133,18 @@ has rpm_name => (
 );
 
 has _rpm_requires => (
-	is      => 'ro',
+	is       => 'ro',
 	init_arg => 'rpm_requires',
+);
+
+has _with => (
+	is       => 'ro',
+	init_arg => 'with',
+);
+
+has _without => (
+	is       => 'ro',
+	init_arg => 'without',
 );
 
 sub build_requires {
