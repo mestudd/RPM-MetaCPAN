@@ -76,6 +76,10 @@ use Moo;
 use strictures 2;
 use namespace::clean;
 
+has archive_name => (
+	is => 'rw',
+);
+
 has download_url => (
 	is      => 'rw',
 );

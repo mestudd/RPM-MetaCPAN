@@ -160,6 +160,7 @@ sub generate_spec {
 	my $epoch = $config->epoch;
 	my $version = $release->version;
 	$version =~ s/^v//; # RPM version must not have the v.
+	my $archive = $config->archive_name || $name;
 	my $license = $self->license_for($release);
 	my $summary = $release->abstract;
 	my $description = $release->description || $release->abstract;
@@ -261,7 +262,7 @@ Summary:        $summary
 License:        $license
 Group:          Development/Libraries
 URL:            https://metacpan.org/release/$name
-Source0:        $name-%{version}.tar.gz
+Source0:        $archive-%{version}.tar.gz
 $patches
 }. ($noarch ? "BuildArch:      noarch" : '') . qq{
 BuildRoot:      %{_tmppath}/%{pkg_name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -286,7 +287,7 @@ $provides
 $description
 
 %prep
-%setup -q -n $name-%{version}
+%setup -q -n $archive-%{version}
 $patches_apply
 
 %build
