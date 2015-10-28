@@ -49,10 +49,10 @@ sub end_release {
 	} elsif ($release->version_local) {
 		say "$name: At latest version";
 
-	} elsif (open(my $fh, '>', $self->spec($name))) {
+	} elsif (open(my $fh, '>:encoding(UTF-8)', $self->spec($name))) {
 		# Write spec file
+		say sprintf '%s: Writing %s', $name, $self->spec($name);
 		print $fh $self->generate_spec($release);
-		say sprintf '%s: Wrote %s', $name, $self->spec($name);
 
 	} else {
 		die "Could not open spec file for writing: $!\n";

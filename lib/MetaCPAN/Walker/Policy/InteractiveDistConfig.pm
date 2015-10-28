@@ -78,7 +78,7 @@ sub add_missing {
 		}
 	}
 
-	if (open(my $fh, '>', 'dists.incr.json')) {
+	if (open(my $fh, '>:encoding(UTF-8)', 'dists.incr.json')) {
 		print $fh $JSON->encode($self->dist_config->config);
 	}
 

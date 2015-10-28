@@ -65,7 +65,7 @@ sub _read_json_file {
 	my ($self, $file) = @_;
 
 	local $/;
-	open( my $fh, '<', $file );
+	open( my $fh, '<:encoding(UTF-8)', $file );
 	my $json_text = <$fh>;
 	close ($fh);
 	return decode_json($json_text);

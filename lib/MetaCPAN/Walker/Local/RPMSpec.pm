@@ -20,7 +20,7 @@ sub local_version {
 
 	my $name = $release->distribution;
 	if (!exists $self->versions->{$name}) {
-		if (open(my $fh, '<', $self->spec($name))) {
+		if (open(my $fh, '<:encoding(UTF-8)', $self->spec($name))) {
 			my $prefix = $release->version =~ /^v/ ? 'v' : '';
 			while (<$fh>) {
 				if (/^version:\W*(\S+)/i) {
