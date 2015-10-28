@@ -43,6 +43,7 @@ sub end_release {
 	# download source file
 	$self->download_release($release);
 
+	my $wrote_spec = 0;
 	if ($release->update_available) {
 		warn "$name: Can't update spec files yet";
 
@@ -53,12 +54,13 @@ sub end_release {
 		# Write spec file
 		say sprintf '%s: Writing %s', $name, $self->spec($name);
 		print $fh $self->generate_spec($release);
+		$wrote_spec = 1;
 
 	} else {
 		die "Could not open spec file for writing: $!\n";
 	}
 
-	if ($self->wait_spec) {
+	if ($wrote_spec && $self->wait_spec) {
 		print "Waiting to continue ";
 		my $enter = <STDIN>;
 	}
