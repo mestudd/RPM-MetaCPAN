@@ -150,7 +150,7 @@ sub generate_spec {
 	# FIXME need to calculate these
 	my $noarch = !grep /[.](?:[ch]|xs|inl)$/i, @files; # grep source tarball for .c, .h, .xs, .inl files
 	my $scripts = grep /^(?:script|bin)\//, @files; # meta->  script_files or scripts
-	my $uses_autoinstall = 0; # not in either cpanspec 1.78 nor rpmcpan
+	my $uses_autoinstall = grep /Module\/AutoInstall.pm/, @files;
 	my $uses_buildpl = grep /^Build\.PL$/, @files; # grep source tarball for Build.PL (near top of hierarchy)
 	my $date = strftime("%a %b %d %Y", localtime);
 	my $packager = `rpm --eval '%packager'`;
@@ -192,10 +192,6 @@ sub generate_spec {
 		qq{\n%global __requires_exclude %{?__requires_exclude|%__requires_exclude|}^%{?scl_prefix}perl\\\\($_\\\\)},
 		$config->exclude_requires);
 
-	my $autoinstall_nodeps = '';
-	if ($uses_autoinstall) {
-		$autoinstall_nodeps = qq{export PERL_AUTOINSTALL="--skipdeps"\n};
-	}
 	my $build = '';
 	my $install = '';
 	my $remove = '';
@@ -293,6 +289,7 @@ $description
 $patches_apply
 
 %build
+}. ($uses_autoinstall ? 'export PERL_AUTOINSTALL="--skipdeps"' : '') . qq{
 %{?scl:scl enable %{scl} '}$build%{?scl:'}
 
 %install
