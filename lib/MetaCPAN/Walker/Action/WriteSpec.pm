@@ -54,6 +54,7 @@ sub end_release {
 		# Write spec file
 		say sprintf '%s: Writing %s', $name, $self->spec($name);
 		print $fh $self->generate_spec($release);
+		close($fh);
 		$wrote_spec = 1;
 
 	} else {
