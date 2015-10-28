@@ -231,4 +231,16 @@ sub requires {
 	);
 }
 
+sub rpm_build_requires {
+	my $self = shift;
+
+	return @{ $self->_rpm_build_requires // [] };
+}
+
+sub rpm_requires {
+	my $self = shift;
+
+	return @{ $self->_rpm_requires // [] };
+}
+
 1;

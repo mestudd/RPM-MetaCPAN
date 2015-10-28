@@ -174,11 +174,13 @@ sub generate_spec {
 	my $reqs = $config->requires($release);
 
 	my $build_requires = join("\n",
-		map "BuildRequires:  \%{?scl_prefix}perl($_)",
-			sort $build_reqs->required_modules);
+		map("BuildRequires:  $_", sort $config->rpm_build_requires),
+		map("BuildRequires:  \%{?scl_prefix}perl($_)",
+			sort $build_reqs->required_modules));
 	my $requires = join("\n",
-		map "Requires:       %{?scl_prefix}perl($_)",
-			sort $reqs->required_modules);
+		map("Requires:       $_", sort $config->rpm_requires),
+		map("Requires:       %{?scl_prefix}perl($_)",
+			sort $reqs->required_modules));
 	my $provides = join("\n",
 		map "Provides:       %{?scl_prefix}perl($_)",
 			$config->provides);
