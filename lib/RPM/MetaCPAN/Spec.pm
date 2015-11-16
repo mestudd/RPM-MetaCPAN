@@ -149,7 +149,7 @@ sub generate_spec {
 
 	# FIXME need to calculate these
 	my $noarch = !grep /[.](?:[ch]|xs|inl)$/i, @files; # grep source tarball for .c, .h, .xs, .inl files
-	my $scripts = grep /^(?:script|bin)\//, @files; # meta->  script_files or scripts
+	my $scripts = grep /^(?:scripts?|bin)\//, @files; # meta->  script_files or scripts
 	my $uses_autoinstall = grep /Module\/AutoInstall.pm/, @files;
 	my $uses_buildpl = grep /^Build\.PL$/, @files; # grep source tarball for Build.PL (near top of hierarchy)
 	my $date = strftime("%a %b %d %Y", localtime);
@@ -160,7 +160,9 @@ sub generate_spec {
 	my $epoch = $config->epoch;
 	my $version = $release->version;
 	$version =~ s/^v//; # RPM version must not have the v.
-	my $archive = $config->archive_name || $name;
+	my $source = $release->download_url;
+	$source =~ s/-(v?)[.0-9a-zA-Z]+.tar.gz/-$1%{version}.tar.gz/;
+	my $archive = basename($source, '.tar.gz', '.tar.bz2', '.tgz');
 	my $license = $self->license_for($release);
 	my $summary = $release->abstract;
 	my $description = $release->description || $release->abstract;
@@ -199,6 +201,7 @@ sub generate_spec {
 	if ($uses_buildpl) {
 		$build = 'perl Build.PL --installdirs=vendor';
 		$build .= ' --optimize="%{optflags}"' unless ($noarch);
+		$build .= ' && ./Build';
 		$install = './Build install --destdir=%{buildroot} --create_packlist=0';
 		$check = './Build test';
 	} else {
@@ -260,7 +263,7 @@ Summary:        $summary
 License:        $license
 Group:          Development/Libraries
 URL:            https://metacpan.org/release/$name
-Source0:        $archive-%{version}.tar.gz
+Source0:        $source
 $patches
 }. ($noarch ? "BuildArch:      noarch" : '') . qq{
 BuildRoot:      %{_tmppath}/%{pkg_name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -285,7 +288,7 @@ $provides
 $description
 
 %prep
-%setup -q -n $archive-%{version}
+%setup -q -n $archive
 $patches_apply
 
 %build
