@@ -72,9 +72,9 @@ sub release {
 }
 
 package RPM::MetaCPAN::DistConfig::Dist;
-use Moo;
 use strictures 2;
 use namespace::clean;
+use Moo;
 
 has archive_name => (
 	is => 'rw',
@@ -241,6 +241,19 @@ sub rpm_requires {
 	my $self = shift;
 
 	return @{ $self->_rpm_requires // [] };
+}
+
+no Moo;
+sub with {
+	my $self = shift;
+
+	return @{ $self->_with // [] };
+}
+
+sub without {
+	my $self = shift;
+
+	return @{ $self->_without // [] };
 }
 
 1;

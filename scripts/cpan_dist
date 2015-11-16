@@ -33,5 +33,10 @@ $walker->walk_from_modules(@ARGV);
 }
 {
 	open (my $fh, '>', 'dists.order') or die "Could not open dists.order $!";
-	say $fh $_ foreach (@{ $walker->action->build_order });
+	foreach (@{ $walker->action->build_order }) {
+		my $release = $rpm->dist_config->release($_);
+		my $with = join('', map "--with $_ ", $release->with);
+		my $without = join('', map "--without $_ ", $release->without);
+		say $fh join('', $with, $without, $release->rpm_name // 'perl-'.$_.'.spec');
+	}
 }
