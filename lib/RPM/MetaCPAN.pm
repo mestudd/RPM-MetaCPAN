@@ -78,15 +78,60 @@ __END__
 
 =head1 NAME
 
-RPM::MetaCPAN - Blah blah blah
+RPM::MetaCPAN - Manage RPM specs using MetaCPAN
 
 =head1 SYNOPSIS
 
+  #!/usr/bin/perl
+  use MetaCPAN::Walker;
+  use MetaCPAN::Walker::Action::WriteSpec;
+  use MetaCPAN::Walker::Local::RPMSpec;
+  use MetaCPAN::Walker::Policy::DistConfig;
   use RPM::MetaCPAN;
+
+  my $rpm = RPM::MetaCPAN->new_with_options;
+  
+  my %params = (
+      %{ $rpm->configuration },
+      dist_config => $rpm->dist_config,
+  );
+  
+  my $walker = MetaCPAN::Walker->new(
+      action => MetaCPAN::Walker::Action::WriteSpec->new(%params),
+      local  => MetaCPAN::Walker::Local::RPMSpec->new(%params),
+      policy => MetaCPAN::Walker::Policy::DistConfig->new(%params),
+  );
+  
+  $walker->walk_from_modules(qw(namespace::clean Test::Most));
 
 =head1 DESCRIPTION
 
-RPM::MetaCPAN is
+RPM::MetaCPAN is an RPM spec management tool using L<MetaCPAN::Walker>. It
+aids in generating and maintaining CPAN dependencies as RPMs.
+
+=head1 Attributes
+
+=head2 config_file
+
+The filename of the RPM::MetaCPAN configuration file.
+
+=head2 configuration
+
+The content of the RPM::MetaCPAN configuration as a raw perl data structure.
+It contains parameters passed to the implementing objects.
+
+=head2 dist_file
+
+The filename of the distribution configuration.
+
+=head2 dist_config
+
+The L<RPM::MetaCPAN::DistConfig> object containing the distribution
+configuration.
+
+=head2 wait_spec
+
+Set to override the value stored in the configuration.
 
 =head1 AUTHOR
 

@@ -150,3 +150,73 @@ sub process_release {
 }
 
 1;
+__END__
+
+=encoding utf-8
+
+=head1 NAME
+
+MetaCPAN::Walker::Policy::DistConfig - Walk policy from dist config file
+
+=head1 SYNOPSIS
+
+  use MetaCPAN::Walker;
+  use MetaCPAN::Walker::Policy::DistConfig;
+  use RPM::MetaCPAN;
+
+  my $rpm = RPM::MetaCPAN->new(config_file => 'dist.json');
+  my $policy = MetaCPAN::Walker::Policy::InteractiveDistConfig->new(
+      core => 0,
+      dist_config => $rpm->dist_config,
+	  perl => '5.22.0',
+	  seen => 0,
+  );
+  
+  my $walker = MetaCPAN::Walker->new(
+      policy => $policy,
+  );
+  
+  $walker->walk_from_modules(qw(namespace::clean Test::Most));
+
+=head1 DESCRIPTION
+
+MetaCPAN::Walker::Policy::DistConfig defines a flexible policy for walks,
+based on a distribution configuration file.
+
+=head1 Attributes
+
+head2 core
+
+Set true to walk core modules (those included with perl). Defaults to false.
+
+=head2 dist_config
+
+L<RPM::MetaCPAN::DistConfig> object defining the distribution configuration.
+
+=head2 missing
+
+Tracks the list of missing distributions.
+
+=head2 seen
+
+Set true to walk each release every time it appears. Set false to only walk
+each release the first time it appears. Defaults to false
+
+=head2 perl
+
+Set the version of perl targetted. Defaults to 5.22.0.
+
+=head1 AUTHOR
+
+Malcolm Studd E<lt>mestudd@gmail.comE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2015- Recognia Inc.
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

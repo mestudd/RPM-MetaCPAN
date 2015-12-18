@@ -1,7 +1,7 @@
 package RPM::MetaCPAN::DistConfig;
 use v5.10.0;
 
-use Module::CoreList;
+use RPM::MetaCPAN::DistConfig::Dist;
 use Scalar::Util qw(blessed);
 
 use Moo;#XXX? ::Role;
@@ -71,189 +71,68 @@ sub release {
 	return $self->_releases->{$name};
 }
 
-package RPM::MetaCPAN::DistConfig::Dist;
-use strictures 2;
-use namespace::clean;
-use Moo;
-
-has archive_name => (
-	is => 'rw',
-);
-
-has download_url => (
-	is      => 'rw',
-);
-
-has epoch => (
-	is      => 'rw',
-);
-
-has _exclude_build_requires => (
-	is       => 'ro',
-	init_arg => 'exclude_build_requires',
-);
-
-has _exclude_requires => (
-	is       => 'ro',
-	init_arg => 'exclude_requires',
-);
-
-has _extra_build_requires => (
-	is       => 'ro',
-	init_arg => 'extra_build_requires',
-);
-
-has _extra_requires => (
-	is       => 'ro',
-	init_arg => 'extra_requires',
-);
-
-has _features => (
-	is       => 'ro',
-	init_arg => 'features',
-);
-
-has _patches => (
-	is       => 'ro',
-	init_arg => 'patches',
-);
-
-has _provides => (
-	is       => 'ro',
-	init_arg => 'provides',
-);
-
-has _rpm_build_requires => (
-	is       => 'ro',
-	init_arg => 'rpm_build_requires',
-);
-
-has rpm_name => (
-	is      => 'rw',
-);
-
-has _rpm_requires => (
-	is       => 'ro',
-	init_arg => 'rpm_requires',
-);
-
-has _with => (
-	is       => 'ro',
-	init_arg => 'with',
-);
-
-has _without => (
-	is       => 'ro',
-	init_arg => 'without',
-);
-
-sub build_requires {
-	my ($self, $release, $perl, $core, $rel) = @_;
-
-	$rel = [qw(requires recommends suggests)] if (!$rel);
-	return $self->_requires(
-		$release,
-		$perl,
-		$core,
-		[qw(configure build test)],
-		$rel,
-		$self->_exclude_build_requires,
-		$self->_extra_build_requires,
-	);
-}
-
-sub exclude_build_requires {
-	my $self = shift;
-
-	return @{ $self->_exclude_build_requires // [] };
-}
-
-sub exclude_requires {
-	my $self = shift;
-
-	return @{ $self->_exclude_requires // [] };
-}
-
-sub features {
-	my $self = shift;
-
-	return @{ $self->_features // [] };
-}
-
-sub patches {
-	my $self = shift;
-
-	return @{ $self->_patches // [] };
-}
-
-sub provides {
-	my $self = shift;
-
-	return @{ $self->_provides // [] };
-}
-
-sub _requires {
-	my ($self, $release, $perl, $core, $phases, $rel, $exclude, $extra) = @_;
-
-	my $reqs = $release
-		->effective_prereqs($self->_features)
-		->merged_requirements($phases, $rel);
-
-	unless ($core) {
-		foreach my $module ($reqs->required_modules) {
-			if (Module::CoreList::is_core($module, undef, $perl)) {
-				$reqs->clear_requirement($module);
-			}
-		}
-	}
-
-	$reqs->clear_requirement($_)
-		foreach ('perl', @$exclude);
-	while (my ($module, $version) = each %$extra) {
-		$reqs->add_string_requirement($module, $version);
-	}
-
-	return $reqs;
-}
-
-sub requires {
-	my ($self, $release, $perl, $core, $rel) = @_;
-
-	$rel = [qw(requires recommends suggests)] if (!$rel);
-	return $self->_requires(
-		$release,
-		$perl,
-		$core,
-		[qw(runtime)],
-		$rel,
-		$self->_exclude_requires,
-		$self->_extra_requires,
-	);
-}
-
-sub rpm_build_requires {
-	my $self = shift;
-
-	return @{ $self->_rpm_build_requires // [] };
-}
-
-sub rpm_requires {
-	my $self = shift;
-
-	return @{ $self->_rpm_requires // [] };
-}
-
-no Moo;
-sub with {
-	my $self = shift;
-
-	return @{ $self->_with // [] };
-}
-
-sub without {
-	my $self = shift;
-
-	return @{ $self->_without // [] };
-}
-
 1;
+__END__
+
+=encoding utf-8
+
+=head1 NAME
+
+RPM::MetaCPAN - CPAN distribution configuration for RPM::MetaCPAN
+
+=head1 SYNOPSIS
+
+  use RPM::MetaCPAN::DistConfig;
+  
+  my $config = RPM::MetaCPAN::DistConfig->new(releases => {
+      'namespace::clean' => {
+	  },
+	  'Test::Most' => {
+
+	  },
+  });
+  
+  my $true = $config->has_release('namespace::clean');
+  my $dist = $config->release('Test::Most');
+  $config->release('Moo', $dist);
+  
+  my $data = $config->config;
+
+=head1 DESCRIPTION
+
+RPM::MetaCPAN::DistConfig contains a set of distribution configurations.
+
+=head1 METHODS
+
+=head2 new
+
+Constructor taking the standard Moo attributes. There is only one attribute,
+C<releases>. This must contain a hash of L<RPM::MetaCPAN::DistConfig::Dist>
+objects or hashes to be coerced to the objects.
+
+=head2 config
+
+Returns a raw perl data strucure of the distribution configuration, suitable
+for serialising with L<JSON>, L<YAML>, or similar.
+
+=head2 release($name[, $dist])
+
+Access the distribution object for the named release. If the C<$dist> parameter
+is passed, sets the value of the release.
+
+=head1 AUTHOR
+
+Malcolm Studd E<lt>mestudd@gmail.comE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2015- Malcolm Studd
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+=cut

@@ -74,3 +74,54 @@ sub missing_module {}
 sub circular_dependency {}
 
 1;
+__END__
+
+=encoding utf-8
+
+=head1 NAME
+
+MetaCPAN::Walker::Action::WriteSpec - Write rpm spec file
+
+=head1 SYNOPSIS
+
+  use MetaCPAN::Walker;
+  use MetaCPAN::Walker::Action::WriteSpec;
+  
+  my $walker = MetaCPAN::Walker->new(
+      action => MetaCPAN::Walker::Action::WriteSpec->new(),
+  );
+  
+  $walker->walk_from_modules(qw(namespace::clean Test::Most));
+
+=head1 DESCRIPTION
+
+MetaCPAN::Walker::Action::WriteSpec writes an RPM spec file in the
+C<end_release> method. It keeps track of the order required to build
+the RPMs. Optionally, it will wait after writing each file; this allows
+you to test/build the spec before continuing.
+
+=head1 Attributes
+
+=head2 build_order
+
+Contains an order to build the RPMs without dependency errors. essentially
+a depth-first traversal of the dependency tree.
+
+=head2 wait_spec
+
+Set true to wait for input after each written spec file. Default is false
+
+=head1 AUTHOR
+
+Malcolm Studd E<lt>mestudd@gmail.comE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2015- Recognia Inc.
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
