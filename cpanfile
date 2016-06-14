@@ -1,7 +1,7 @@
 requires 'perl', 'v5.10.0';
 requires 'Archive::Tar';
 requires 'CPAN::Meta';
-requires 'File::Basename'
+requires 'File::Basename';
 requires 'HTTP::Tiny';
 requires 'JSON';
 requires 'MetaCPAN::Client::Release';
