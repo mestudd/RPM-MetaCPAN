@@ -83,7 +83,7 @@
          "web" : "https://github.com/mestudd/RPM-MetaCPAN"
       }
    },
-   "version" : "0.01",
+   "version" : "0.0.1",
    "x_contributors" : [
       "Malcolm Studd <mstudd@recognia.com>"
    ]
