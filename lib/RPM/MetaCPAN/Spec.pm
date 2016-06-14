@@ -356,3 +356,86 @@ sub source {
 }
 
 1;
+__END__
+
+=encoding utf-8
+
+=head1 NAME
+
+RPM::MetaCPAN::Spec - Moo role for spec files
+
+=head1 SYNOPSIS
+
+  package My::Class
+  use Moo;
+  with 'RPM::MetaCPAN::Spec';
+
+  my $obj = My::Class->new(
+      dist_config => $dist_config,
+	  perl => '5.22.0',
+  );
+
+  my $rpm_license = $obj->license_for($release);
+  my $rpm_name = $obj->name($name);
+  $obj->download_release($release);
+  my $spec = $obj->generate_spec($release);
+
+
+=head1 DESCRIPTION
+
+RPM::MetaCPAN::Spec is a Moo role providing helpers for dealing with RPM spec-
+files.
+
+=head1 Attributes
+
+=head2 dist_config
+
+L<RPM::MetaCPAN::DistConfig> object containing the distribution configuration.
+
+=head2 source_dir
+
+The source directory. Defaults to the directory specified by RPM.
+
+=head2 spec_dir
+
+The spec-file directory. Defaults to the directory specified by RPM.
+
+=head2 perl
+
+Version of perl RPM is built for.
+
+=head1 METHODS
+
+=head2 license_for($release)
+
+Passed a L<MetaCPAN::Walker::Release> object, it returns a license descriptor
+suitable for a spec file.
+
+=head2 name($name)
+
+Passed a CPAN distribution name, returns the RPM name.
+
+=head2 download_release($release)
+
+Passed a L<MetaCPAN::Walker::Release> object, it downloads the release into
+the source directory.
+
+=head2 generate_spec($release)
+
+Generates and returns the spec-file contents for the passed
+L<MetaCPAN::Walker::Release> object.
+
+=head1 AUTHOR
+
+Malcolm Studd E<lt>mestudd@gmail.comE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2015- Malcolm Studd
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
