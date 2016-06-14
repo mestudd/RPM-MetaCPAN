@@ -9,13 +9,6 @@ our $VERSION = '0.01';
 
 with qw(MetaCPAN::Walker::Policy);
 
-=cut
-has conflicts => (
-	is => 'ro',
-	default => sub { {}; },
-);
-=cut
-
 has core  => (
 	is      => 'ro',
 	default => 0,
@@ -53,23 +46,6 @@ has _seen => (
 	lazy    => 1,
 	default => sub { {} },
 );
-
-=cut
-
-sub _add_conflict {
-	my ($self, $release, $path) = @_;
-
-	# //=?
-	my $name = $release->name;
-	if (!exists $self->conflicts->{$name}) {
-		$self->conflicts->{$name} = {
-			release => $release,
-			paths   => [],
-		}
-	}
-	push @{$self->conflicts->{$name}->{paths}}, $path;
-}
-=cut
 
 # override to get interactive behaviour, etc
 sub add_missing {
@@ -116,37 +92,6 @@ sub process_release {
 	}
 
 	return $self->seen || !$seen;
-
-
-
-
-
-
-
-
-
-
-
-
-
-=cut
-	# Keep track of conflicting releases
-	if ($self->_in_conflict) {
-		$self->_add_conflict($release, [ @$path ]);
-		$self->_in_conflict(0);
-		return 0;
-	}
-
-	if (!exists $self->dist_config->{$release->name}) {
-		$self->add_missing([ @$path ], $release);
-		return 0;
-	}
-
-	my $seen = $self->_seen->{$release->name};
-	$self->_seen->{$release->name} = 1;
-
-	return $self->seen || !$seen;
-=cut
 }
 
 1;
