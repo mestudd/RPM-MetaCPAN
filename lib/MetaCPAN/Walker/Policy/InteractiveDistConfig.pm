@@ -42,7 +42,7 @@ sub add_missing {
 			join(', ', map $_->identifier, @features);
 	}
 	my $key = $self->_read_char(
-		'  Action: -)nfo s)kip; a)dd; c)ustomise? ',
+		'  Action: s)kip; a)dd; c)ustomise? ',
 		'sac',
 	);
 	while ($key) {
@@ -50,21 +50,6 @@ sub add_missing {
 			$self->missing->{$release->name} = $release;
 			$add = 0;
 			last;
-
-=cut
-		} elsif ('i' eq $key) {
-			# FIXME: add other info if possible?
-			my $dist = $self->_new_dist();
-			say 'Runtime dependencies';
-			$self->_print_requires($dist, 'requires', $release);
-			say 'Build dependencies';
-			$self->_print_requires($dist, 'requires', $release);
-			$key = $self->_read_char(
-				"  Action: s)kip; a)dd; c)ustomise? ",
-				'sac',
-			);
-			next;
-=cut
 
 		} elsif ('a' eq $key) {
 			say "Adding $name with no customisation";
@@ -251,7 +236,6 @@ sub _read_string {
 		print $question;
 		$answer = ReadLine(0);
 		chomp $answer;
-$DB::single = 1;
 		last if (!$answer);
 		last if (!defined($re) || $answer =~ $re);
 	}
