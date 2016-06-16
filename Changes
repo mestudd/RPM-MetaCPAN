@@ -2,6 +2,9 @@ Revision history for RPM-MetaCPAN
 
 {{$NEXT}}
 
+0.0.3  2016-06-16 12:05:20 EDT
+        - Install scripts.
+
 0.0.2  2016-06-16 12:02:08 EDT
         - Support indicating desired release version (latest MetaCPAN::Walker).
 
