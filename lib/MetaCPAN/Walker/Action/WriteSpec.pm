@@ -5,7 +5,7 @@ use Moo;
 use strictures 2;
 use namespace::clean;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 with qw(MetaCPAN::Walker::Action RPM::MetaCPAN::Spec);
 

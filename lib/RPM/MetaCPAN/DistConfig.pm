@@ -8,7 +8,7 @@ use Moo;#XXX? ::Role;
 use strictures 2;
 use namespace::clean;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 
 has _releases => (
