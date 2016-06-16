@@ -1,7 +1,7 @@
 package RPM::MetaCPAN;
 use v5.10.0;
  
-use JSON::XS qw(decode_json);
+use JSON qw(decode_json);
 use MetaCPAN::Walker;
 use RPM::MetaCPAN::DistConfig;
 
@@ -38,6 +38,12 @@ has dist_config => (
 	builder => '_build_dist_config',
 );
 
+option upgrade => (
+	is          => 'ro',
+	predicate   => 1,
+	negativable => 1,
+);
+
 option wait_spec => (
 	is          => 'ro',
 	predicate   => 1,
@@ -47,9 +53,8 @@ option wait_spec => (
 sub _build_configuration {
 	my $self = shift;
 	my $config = $self->_read_json_file($self->config_file);
-	if ($self->has_wait_spec) {
-		$config->{wait_spec} = $self->wait_spec;
-	}
+	$config->{upgrade} = $self->upgrade if ($self->has_upgrade);
+	$config->{wait_spec} = $self->wait_spec if ($self->has_wait_spec);
 	return $config;
 }
 

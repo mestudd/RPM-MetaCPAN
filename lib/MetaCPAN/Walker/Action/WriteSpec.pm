@@ -44,8 +44,11 @@ sub end_release {
 	$self->download_release($release);
 
 	my $wrote_spec = 0;
-	if ($release->update_available) {
+	if ($release->update_requested) {
 		warn "$name: Can't update spec files yet";
+
+	} elsif ($release->update_available) {
+		warn "$name: Update available";
 
 	} elsif ($release->version_local) {
 		say "$name: At latest version";

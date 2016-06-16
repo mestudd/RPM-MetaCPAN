@@ -244,6 +244,23 @@ sub _read_string {
 	return $answer;
 }
 
+sub release_version {
+	my ($self, $release) = @_;
+
+	my $name = $release->name;
+	my $latest = $release->version_latest;
+	my $local = $release->version_local;
+	my $want = $latest;
+	if ($local && $latest gt $local) {
+		my $key = $self->_read_char(
+			"Release $name $local has update to $latest: upgrade? [y/n] ",
+			'yn',
+		);
+		$want = $local if ($key eq 'n');
+	}
+	return $want;
+}
+
 1;
 __END__
 

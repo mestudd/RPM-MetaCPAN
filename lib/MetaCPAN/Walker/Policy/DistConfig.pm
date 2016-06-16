@@ -47,6 +47,11 @@ has _seen => (
 	default => sub { {} },
 );
 
+has upgrade  => (
+	is      => 'ro',
+	default => 0,
+);
+
 # override to get interactive behaviour, etc
 sub add_missing {
 	my ($self, $path, $release) = @_;
@@ -92,6 +97,15 @@ sub process_release {
 	}
 
 	return $self->seen || !$seen;
+}
+
+sub release_version {
+	my ($self, $release) = @_;
+
+	if (!$self->upgrade && $release->version_local) {
+		return $release->version_local;
+	}
+	return $release->version_latest;
 }
 
 1;
